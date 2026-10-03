@@ -1,0 +1,15 @@
+{
+  "id": "paseo-mesh",
+  "requirements": {
+    "paseo": ">=0.10.3"
+  },
+  "build": [
+    [
+      "npm",
+      "install",
+      "--omit=dev",
+      "--no-audit",
+      "--no-fund"
+    ]
+  ]
+}
