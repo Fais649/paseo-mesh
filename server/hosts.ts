@@ -72,7 +72,7 @@ interface Connection {
   error: string | null;
 }
 
-/** Lazily connected clients for this host and every configured peer. */
+/** Connected clients for this host and every configured peer, reconnecting on demand. */
 export class HostRegistry {
   private settings: MeshSettings;
   private connections = new Map<string, Connection>();
@@ -91,7 +91,7 @@ export class HostRegistry {
 
   update(settings: MeshSettings) {
     this.settings = settings;
-    // Drop connections whose target changed; they reconnect on next use.
+    // Drop connections whose target changed, then reconnect everything in the background.
     const wanted = new Map<string, string>([[this.selfName, this.selfKey()]]);
     for (const peer of this.activePeers()) wanted.set(peer.name, this.peerKey(peer));
     for (const [name, conn] of this.connections) {
@@ -100,6 +100,12 @@ export class HostRegistry {
         this.connections.delete(name);
       }
     }
+    this.warm();
+  }
+
+  /** Open every connection in the background so status reflects reality before first use. */
+  warm() {
+    for (const name of this.hostNames()) void this.get(name).catch(() => {});
   }
 
   private selfKey() {

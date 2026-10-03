@@ -17,7 +17,10 @@ export default function contribute(server: PluginServerContext) {
   const started: Promise<ServiceInfo> = (async () => {
     const current = await settings.read();
     if (current.status === "ready") hosts.update(current.values);
-    else console.error("paseo-mesh settings are invalid; using defaults:", current.error);
+    else {
+      console.error("paseo-mesh settings are invalid; using defaults:", current.error);
+      hosts.warm();
+    }
     const { info, stop } = await startService(tools);
     stopService = stop;
     console.log(`paseo-mesh service on 127.0.0.1:${info.port} as host "${hosts.selfName}"`);
